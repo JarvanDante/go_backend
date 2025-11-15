@@ -81,8 +81,12 @@ export default defineConfig(({ command, mode }) => {
       })
     ],
     server: {
-      host: 'localhost',
-      port: 8001,
+      host: "0.0.0.0",
+      port: 9527,
+      allowedHosts: [
+        "i.go_backend.com",
+        "127.0.0.1"
+      ],
       proxy: {
         '/api-test': {
           target: 'https://api.midfar.com/dspt_test/api',
