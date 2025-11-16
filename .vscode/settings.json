@@ -1,0 +1,30 @@
+{
+  // Vue 使用官方 TS 插件
+  "vue.server.includeLanguages": {
+    "vue": "typescript"
+  },
+
+  // 启用类型检查
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  // 格式化优先使用 Prettier
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 保存自动格式化
+  "editor.formatOnSave": true,
+
+  // 自动修复 ESLint
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+
+  // 启用路径提示
+  "path-intellisense.mappings": {
+    "@": "${workspaceFolder}/src"
+  },
+
+  // 关闭 Vetur
+  "vetur.validation.template": false,
+  "vetur.validation.templateProps": false
+}
