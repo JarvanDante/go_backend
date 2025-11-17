@@ -54,6 +54,7 @@ function buildRoutesFromPermissions(list, userPermissions) {
     // 如果根节点没有权限，跳过
     if (!allowedSet.has(menu.id)) return
     if (menu.type === 2) return
+    const validChildren = (menu.children || []).filter(c => c.type === 1 && allowedSet.has(c.id))
 
     const route: RouteRecordRaw = {
       path: '/' + menu.frontend_url,
@@ -62,7 +63,7 @@ function buildRoutesFromPermissions(list, userPermissions) {
       meta: {
         title: menu.name,
         id: menu.id,
-        alwaysShow: true,
+        alwaysShow: validChildren.length > 0,
         icon: 'list'
       }
     }
