@@ -1,8 +1,12 @@
-import { getInfo as apiGetInfo, logout as apiLogout, login } from '@/api/user'
-import router, { resetRouter } from '@/router'
+import {
+  getInfo as apiGetInfo,
+  login as apiLogin,
+  logout as apiLogout,
+  permissions as apiPermissions
+} from '@/api/user'
+import { resetRouter } from '@/router'
 import { getToken, removeToken, setToken } from '@/utils/auth'
 import { defineStore } from 'pinia'
-import permissionStore from './permission'
 import tagsViewStore from './tagsView'
 
 export interface IUserState {
@@ -12,6 +16,8 @@ export interface IUserState {
   avatar: string
   introduction: string
   roles: string[]
+  permissionList: []
+  roleList: []
 }
 
 export default defineStore({
@@ -22,7 +28,9 @@ export default defineStore({
     name: '',
     avatar: '',
     introduction: '',
-    roles: []
+    roles: [],
+    permissionList: [],
+    roleList: []
   }),
   getters: {},
   actions: {
@@ -30,7 +38,7 @@ export default defineStore({
     login(userInfo): Promise<void> {
       const { username, password, code } = userInfo
       return new Promise((resolve, reject) => {
-        login({ username: username.trim(), password, code })
+        apiLogin({ username: username.trim(), password, code })
           .then(response => {
             let token = ''
 
@@ -87,6 +95,32 @@ export default defineStore({
       })
     },
 
+    // 获取所有 角色role 或 权限permissions
+    permissions() {
+      return new Promise((resolve, reject) => {
+        console.log('=' + this.token + '=')
+        apiPermissions()
+          .then(response => {
+            const { data } = response
+
+            if (!data) {
+              reject('Verification failed, please Login again.')
+            }
+
+            const { permission_list, role_list } = data
+            console.log('permission_list:==>' + permission_list)
+            console.log('role_list:==>' + role_list)
+            this.permissionList = permission_list
+            this.roleList = role_list
+
+            resolve(data)
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+
     // user logout
     logout(): Promise<void> {
       return new Promise((resolve, reject) => {
@@ -114,34 +148,35 @@ export default defineStore({
       this.token = ''
       this.roles = []
       removeToken()
-    },
+    }
 
     // dynamically modify permissions
-    async changeRoles(role) {
-      const token = role + '-token'
+    //主动换角色的时候
+    // async changeRoles(role) {
+    //   const token = role + '-token'
 
-      this.token = token
-      setToken(token)
+    //   this.token = token
+    //   setToken(token)
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const infoRes = (await this.getInfo()) as any
-      let roles = []
-      if (infoRes.roles) {
-        roles = infoRes.roles
-      }
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   const infoRes = (await this.getInfo()) as any
+    //   let roles = []
+    //   if (infoRes.roles) {
+    //     roles = infoRes.roles
+    //   }
 
-      resetRouter()
+    //   resetRouter()
 
-      // generate accessible routes map based on roles
-      const accessRoutes = await permissionStore().generateRoutes(roles)
-      // dynamically add accessible routes
-      // router.addRoutes(accessRoutes);
-      accessRoutes.forEach(item => {
-        router.addRoute(item)
-      })
+    //   // generate accessible routes map based on roles
+    //   const accessRoutes = await permissionStore().generateRoutes(roles)
+    //   // dynamically add accessible routes
+    //   // router.addRoutes(accessRoutes);
+    //   accessRoutes.forEach(item => {
+    //     router.addRoute(item)
+    //   })
 
-      // reset visited views and cached views
-      tagsViewStore().delAllViews()
-    }
+    //   // reset visited views and cached views
+    //   tagsViewStore().delAllViews()
+    // }
   }
 })

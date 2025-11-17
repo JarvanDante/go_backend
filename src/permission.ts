@@ -1,69 +1,118 @@
-import router from './router';
-import userStore from './store/modules/user';
-import permissionStore from './store/modules/permission';
-import NProgress from 'nprogress'; // progress bar
-import 'nprogress/nprogress.css'; // progress bar style
-import { getToken } from '@/utils/auth'; // get token from cookie
-import getPageTitle from '@/utils/get-page-title';
+import { getToken } from '@/utils/auth' // get token from cookie
+import getPageTitle from '@/utils/get-page-title'
+import NProgress from 'nprogress' // progress bar
+import 'nprogress/nprogress.css' // progress bar style
+import router from './router'
+import permissionStore from './store/modules/permission'
+import userStore from './store/modules/user'
 
-NProgress.configure({ showSpinner: false }); // NProgress Configuration
+NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['/login', '/auth-redirect']; // no redirect whitelist
+const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
 router.beforeEach(async (to, from, next) => {
   // console.log('router.beforeEach', to.path, from.path);
   // start progress bar
-  NProgress.start();
+  NProgress.start()
 
   // set page title
-  document.title = getPageTitle(to.meta.title);
+  document.title = getPageTitle(to.meta.title)
 
   // determine whether the user has logged in
-  const hasToken = getToken();
+  const hasToken = getToken()
 
   if (hasToken) {
     if (to.path === '/login') {
       // if is logged in, redirect to the home page
-      NProgress.done(); // hack: https://github.com/PanJiaChen/vue-element-admin/pull/2939
-      next({ path: '/' });
+      NProgress.done() // hack: https://github.com/PanJiaChen/vue-element-admin/pull/2939
+      next({ path: '/' })
     } else {
       // determine whether the user has obtained his permission roles through getInfo
-      const hasRoles = userStore().roles && userStore().roles.length > 0;
+      const hasRoles = userStore().roles && userStore().roles.length > 0
       // console.log('hasRoles=', hasRoles);
       if (hasRoles) {
-        next();
+        next()
       } else {
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const infoRes = await userStore().getInfo() as any;
-          let roles = [];
+          const infoRes = (await userStore().getInfo()) as any
+          let roles = []
           if (infoRes.roles) {
-            roles = infoRes.roles;
+            roles = infoRes.roles
+          }
+          // 用户的角色名数组，如 ["管理员"]
+          const userRoles = roles
+
+          // console.log('permission.ts>>generateRoutes')
+
+          const permissionListRes = (await userStore().permissions()) as any
+          // console.log(permissionListRes.permission_list)
+          let permissionList = []
+          if (permissionListRes.permission_list) {
+            permissionList = permissionListRes.permission_list
           }
 
-          // generate accessible routes map based on roles
-          const accessRoutes = await permissionStore().generateRoutes(roles);
+          // 后端返回全部角色及其权限
+          const allRoles = permissionListRes.role_list
+
+          // 用户拥有的所有权限ID（整合所有角色）
+          let rolePermissionIds: string[] = []
+
+          if (userRoles && allRoles) {
+            allRoles.forEach(role => {
+              if (userRoles.includes(role.name)) {
+                rolePermissionIds.push(...role.permission_list)
+              }
+            })
+          }
+
+          console.log('rolePermissionIds==>', rolePermissionIds)
+          const accessRoutes = await permissionStore().generateRoutes(
+            permissionList,
+            rolePermissionIds
+          )
+
+          // //获取所有角色及对应的权限
+          // const permissionListRes = (await userStore().permissions()) as any
+          // console.log(permissionListRes.permission_list)
+          // let permissionList = []
+          // if (permissionListRes.permission_list) {
+          //   permissionList = permissionListRes.permission_list
+          // }
+
+          // let roleList = []
+          // if (permissionListRes.role_list) {
+          //   roleList = permissionListRes.role_list
+          // }
+          // // generate accessible routes map based on roles
+          // const accessRoutes = await permissionStore().generateRoutes(
+          //   roles,
+          //   permissionList,
+          //   roleList
+          // )
           // console.log('accessRoutes=', accessRoutes)
 
           // dynamically add accessible routes
           // router.addRoutes(accessRoutes);
-          accessRoutes.forEach(item => {
-            router.addRoute(item);
-          });
+          // accessRoutes.forEach(item => {
+          //   router.addRoute(item)
+          // })
+          console.log('permission.ts--accessRoutes>>accessRoutes' + accessRoutes)
+          accessRoutes.forEach(r => router.addRoute(r))
           // console.log('next=', accessRoutes);
 
           // hack method to ensure that addRoutes is complete
           // set the replace: true, so the navigation will not leave a history record
-          next({ ...to, replace: true });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          next({ ...to, replace: true })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           // remove token and go to login page to re-login
-          await userStore().resetToken();
-          ElMessage.error(error.message || 'Has Error');
-          NProgress.done();
-          next(`/login?redirect=${to.path}`);
+          await userStore().resetToken()
+          ElMessage.error(error.message || 'Has Error')
+          NProgress.done()
+          next(`/login?redirect=${to.path}`)
         }
       }
     }
@@ -71,16 +120,16 @@ router.beforeEach(async (to, from, next) => {
     /* has no token*/
     if (whiteList.indexOf(to.path) !== -1) {
       // in the free login whitelist, go directly
-      next();
+      next()
     } else {
       // other pages that do not have permission to access are redirected to the login page.
-      NProgress.done();
-      next(`/login?redirect=${to.path}`);
+      NProgress.done()
+      next(`/login?redirect=${to.path}`)
     }
   }
-});
+})
 
 router.afterEach(() => {
   // finish progress bar
-  NProgress.done();
-});
+  NProgress.done()
+})
