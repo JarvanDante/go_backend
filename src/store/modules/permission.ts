@@ -2,7 +2,7 @@ import { constantRoutes } from '@/router'
 import { defineStore } from 'pinia'
 import type { RouteRecordRaw } from 'vue-router'
 
-// 扫描所有页面
+// 扫描所有 views 下的 vue 文件
 const modules = import.meta.glob('@/views/**/*.vue')
 
 function loadView(viewPath: string) {
@@ -10,12 +10,13 @@ function loadView(viewPath: string) {
   return modules[fullPath]
 }
 
-// 根据 permission_list 为 role 自动补全所有父级菜单（只要子级有权限）
+/**
+ * 递归收集所有用户可用菜单 (自动补齐父级)
+ */
 function collectUserMenus(permissionList, userPermissions) {
   const result = new Set()
 
   function dfs(menu) {
-    // 如果当前菜单或其子菜单有权限，则放入 result
     let hasChildPerm = false
 
     if (menu.children && menu.children.length > 0) {
@@ -26,12 +27,11 @@ function collectUserMenus(permissionList, userPermissions) {
       }
     }
 
-    // 当前节点有权限 OR 子节点有权限 → 应加入
+    // 当前节点或子节点有权限
     if (userPermissions.includes(String(menu.id)) || hasChildPerm) {
       result.add(menu.id)
       return true
     }
-
     return false
   }
 
@@ -39,22 +39,51 @@ function collectUserMenus(permissionList, userPermissions) {
   return result
 }
 
-// 构建真正的路由
-function buildRoutesFromPermissions(list, userPermissions) {
-  // console.log('原始 permissionList:', list)
-  // console.log('用户权限:', userPermissions)
+/**
+ * 递归构建子路由（支持无限层级）
+ */
+function buildChildren(menu, parentPath, allowedSet) {
+  if (!menu.children || menu.children.length === 0) {
+    return []
+  }
 
-  // ① 自动补充所有父级节点
+  return menu.children
+    .filter(c => c.type === 1 && allowedSet.has(c.id))
+    .map(c => {
+      const localPath = c.frontend_url.replace(parentPath + '/', '')
+
+      const route: RouteRecordRaw = {
+        path: localPath,
+        name: c.name,
+        component: loadView(c.frontend_url),
+        meta: {
+          title: c.name,
+          id: c.id
+        }
+      }
+
+      // ⭐递归生成更深层级
+      const subChildren = buildChildren(c, c.frontend_url, allowedSet)
+      if (subChildren.length > 0) {
+        route.children = subChildren
+        route.meta!.alwaysShow = true
+      }
+
+      return route
+    })
+}
+
+/**
+ * 生成完整动态路由（根 → 二级 → 三级 → …）
+ */
+function buildRoutesFromPermissions(list, userPermissions) {
   const allowedSet = collectUserMenus(list, userPermissions)
-  // console.log('最终可用节点 ID:', [...allowedSet])
 
   const routes: RouteRecordRaw[] = []
 
   list.forEach(menu => {
-    // 如果根节点没有权限，跳过
     if (!allowedSet.has(menu.id)) return
     if (menu.type === 2) return
-    const validChildren = (menu.children || []).filter(c => c.type === 1 && allowedSet.has(c.id))
 
     const route: RouteRecordRaw = {
       path: '/' + menu.frontend_url,
@@ -63,20 +92,15 @@ function buildRoutesFromPermissions(list, userPermissions) {
       meta: {
         title: menu.name,
         id: menu.id,
-        alwaysShow: validChildren.length > 0,
         icon: 'list'
       }
     }
 
-    if (menu.children) {
-      route.children = menu.children
-        .filter(c => c.type === 1 && allowedSet.has(c.id))
-        .map(c => ({
-          path: c.frontend_url.replace(menu.frontend_url + '/', ''),
-          name: c.name,
-          component: loadView(c.frontend_url),
-          meta: { title: c.name, id: c.id }
-        }))
+    const children = buildChildren(menu, menu.frontend_url, allowedSet)
+
+    if (children.length > 0) {
+      route.children = children
+      route.meta!.alwaysShow = true
     }
 
     routes.push(route)
@@ -85,6 +109,9 @@ function buildRoutesFromPermissions(list, userPermissions) {
   return routes
 }
 
+/**
+ * Pinia Store
+ */
 export default defineStore('permission', {
   state: () => ({
     routes: [] as RouteRecordRaw[],
@@ -93,13 +120,9 @@ export default defineStore('permission', {
 
   actions: {
     generateRoutes(permissionList, userPermissionIds) {
-      //动态路由生成
       const accessedRoutes = buildRoutesFromPermissions(permissionList, userPermissionIds)
-
-      // 注意：this 是 Pinia store 实例，此处不会报错
       this.addRoutes = accessedRoutes
       this.routes = constantRoutes.concat(accessedRoutes)
-
       return accessedRoutes
     }
   }
