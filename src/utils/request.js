@@ -88,10 +88,19 @@ service.interceptors.response.use(
   },
   error => {
     console.log('err' + error) // for debug
-    ElMessage({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
+    let msg = ''
+
+    if (error.message.includes('Network Error')) {
+      msg = '服务器连接失败，请检查网络'
+    } else if (error.code === 'ECONNABORTED') {
+      msg = '请求超时，请稍后再试'
+    } else {
+      msg = error.message
+    }
+
+    ElMessage.error({
+      message: msg,
+      duration: 5000
     })
     return Promise.reject(error)
   }
