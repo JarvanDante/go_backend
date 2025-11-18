@@ -85,7 +85,7 @@
   import type { FormItemRule } from 'element-plus'
   import type { IForm } from '@/types/element-plus'
   import store from '@/store'
-
+  import logo from '@/assets/logo-sys.png'
   interface QueryType {
     // 自定义key 任意字符串
     [propname: string]: string
@@ -280,7 +280,7 @@
   .login-container {
     min-height: 100%;
     width: 100%;
-    background-color: $bg;
+    background-image: url('@/assets/login-bg.jpg');
     overflow: hidden;
 
     .login-form {
