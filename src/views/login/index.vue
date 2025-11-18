@@ -72,32 +72,9 @@
         style="width: 100%; margin-bottom: 30px"
         @click.prevent="handleLogin"
       >
-        Login</el-button
+        登录</el-button
       >
-
-      <div style="position: relative">
-        <div class="tips">
-          <span>Username : admin</span>
-          <span>Password : any</span>
-        </div>
-        <div class="tips">
-          <span style="margin-right: 18px">Username : editor</span>
-          <span>Password : any</span>
-        </div>
-
-        <el-button class="thirdparty-button" type="primary" @click="showDialog = true">
-          Or connect with
-        </el-button>
-      </div>
     </el-form>
-
-    <el-dialog title="Or connect with" v-model="showDialog">
-      Can not be simulated on local, so please combine you own business simulation! ! !
-      <br />
-      <br />
-      <br />
-      <social-sign />
-    </el-dialog>
   </div>
 </template>
 
