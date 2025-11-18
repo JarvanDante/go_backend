@@ -1,7 +1,7 @@
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 import axios from 'axios'
-console.log('import.meta.env=', import.meta.env)
+// console.log('import.meta.env=', import.meta.env)
 
 // 创建axios实例
 const service = axios.create({

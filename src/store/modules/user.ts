@@ -67,7 +67,7 @@ export default defineStore({
     // get user info
     getInfo() {
       return new Promise((resolve, reject) => {
-        console.log('=' + this.token + '=')
+        // console.log('=' + this.token + '=')
         apiGetInfo()
           .then(response => {
             const { data } = response
@@ -98,7 +98,6 @@ export default defineStore({
     // 获取所有 角色role 或 权限permissions
     permissions() {
       return new Promise((resolve, reject) => {
-        console.log('=' + this.token + '=')
         apiPermissions()
           .then(response => {
             const { data } = response
@@ -108,8 +107,7 @@ export default defineStore({
             }
 
             const { permission_list, role_list } = data
-            console.log('permission_list:==>' + permission_list)
-            console.log('role_list:==>' + role_list)
+
             this.permissionList = permission_list
             this.roleList = role_list
 

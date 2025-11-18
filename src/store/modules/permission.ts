@@ -41,12 +41,12 @@ function collectUserMenus(permissionList, userPermissions) {
 
 // 构建真正的路由
 function buildRoutesFromPermissions(list, userPermissions) {
-  console.log('原始 permissionList:', list)
-  console.log('用户权限:', userPermissions)
+  // console.log('原始 permissionList:', list)
+  // console.log('用户权限:', userPermissions)
 
   // ① 自动补充所有父级节点
   const allowedSet = collectUserMenus(list, userPermissions)
-  console.log('最终可用节点 ID:', [...allowedSet])
+  // console.log('最终可用节点 ID:', [...allowedSet])
 
   const routes: RouteRecordRaw[] = []
 
@@ -93,11 +93,8 @@ export default defineStore('permission', {
 
   actions: {
     generateRoutes(permissionList, userPermissionIds) {
-      console.log('动态路由生成:', permissionList, userPermissionIds)
-
+      //动态路由生成
       const accessedRoutes = buildRoutesFromPermissions(permissionList, userPermissionIds)
-
-      console.log('动态路由生成:==accessedRoutes》》', accessedRoutes) //[]
 
       // 注意：this 是 Pinia store 实例，此处不会报错
       this.addRoutes = accessedRoutes

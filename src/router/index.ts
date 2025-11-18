@@ -387,7 +387,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
   { path: '/:pathMatch(.*)*', redirect: '/404', meta: { hidden: true } }
 ]
 
-console.log('BASE_URL=', import.meta.env)
+// console.log('BASE_URL=', import.meta.env)
 
 const createTheRouter = (): Router =>
   createRouter({

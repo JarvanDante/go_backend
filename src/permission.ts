@@ -45,8 +45,6 @@ router.beforeEach(async (to, from, next) => {
           // 用户的角色名数组，如 ["管理员"]
           const userRoles = roles
 
-          // console.log('permission.ts>>generateRoutes')
-
           const permissionListRes = (await userStore().permissions()) as any
           // console.log(permissionListRes.permission_list)
           let permissionList = []
@@ -68,38 +66,12 @@ router.beforeEach(async (to, from, next) => {
             })
           }
 
-          console.log('rolePermissionIds==>', rolePermissionIds)
+          // console.log('rolePermissionIds==>', rolePermissionIds)
           const accessRoutes = await permissionStore().generateRoutes(
             permissionList,
             rolePermissionIds
           )
 
-          // //获取所有角色及对应的权限
-          // const permissionListRes = (await userStore().permissions()) as any
-          // console.log(permissionListRes.permission_list)
-          // let permissionList = []
-          // if (permissionListRes.permission_list) {
-          //   permissionList = permissionListRes.permission_list
-          // }
-
-          // let roleList = []
-          // if (permissionListRes.role_list) {
-          //   roleList = permissionListRes.role_list
-          // }
-          // // generate accessible routes map based on roles
-          // const accessRoutes = await permissionStore().generateRoutes(
-          //   roles,
-          //   permissionList,
-          //   roleList
-          // )
-          // console.log('accessRoutes=', accessRoutes)
-
-          // dynamically add accessible routes
-          // router.addRoutes(accessRoutes);
-          // accessRoutes.forEach(item => {
-          //   router.addRoute(item)
-          // })
-          console.log('permission.ts--accessRoutes>>accessRoutes' + accessRoutes)
           accessRoutes.forEach(r => router.addRoute(r))
           // console.log('next=', accessRoutes);
 
