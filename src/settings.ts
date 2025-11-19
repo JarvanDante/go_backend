@@ -1,21 +1,21 @@
 interface ISettings {
-  title: string;
-  showSettings: boolean;
-  tagsView: boolean;
-  fixedHeader: boolean;
-  sidebarLogo: boolean;
-  secondMenuPopup: boolean;
-  errorLog: string | string[];
+  title: string
+  showSettings: boolean
+  tagsView: boolean
+  fixedHeader: boolean
+  sidebarLogo: boolean
+  secondMenuPopup: boolean
+  errorLog: string | string[]
 }
 
-const settings:ISettings = {
-  title: 'Vue3 Element Admin',
+const settings: ISettings = {
+  title: 'by Admin',
 
   /**
    * @type {boolean} true | false
    * @description Whether show the settings right-panel
    */
-  showSettings: true,
+  showSettings: false, //隐藏设置按钮
 
   /**
    * @type {boolean} true | false
@@ -27,13 +27,13 @@ const settings:ISettings = {
    * @type {boolean} true | false
    * @description Whether fix the header
    */
-  fixedHeader: false,
+  fixedHeader: true, //固定header
 
   /**
    * @type {boolean} true | false
    * @description Whether show the logo in sidebar
    */
-  sidebarLogo: false,
+  sidebarLogo: true,
 
   /**
    * @type {boolean} true | false
@@ -48,6 +48,6 @@ const settings:ISettings = {
    * If you want to also use it in dev, you can pass ['production', 'development']
    */
   errorLog: ['production', 'development'] // ['production', 'development'], 'production'
-};
+}
 
-export default settings;
+export default settings
