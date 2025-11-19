@@ -58,7 +58,7 @@
       width: 100%;
 
       & .sidebar-logo {
-        width: 138px;
+        width: 160px;
         height: 32px;
         vertical-align: middle;
         margin-right: 12px;
