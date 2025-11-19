@@ -85,6 +85,28 @@ function buildRoutesFromPermissions(list, userPermissions) {
     if (!allowedSet.has(menu.id)) return
     if (menu.type === 2) return
 
+    let myIcon = 'list'
+
+    switch (menu.name) {
+      case '系统':
+        myIcon = 'password'
+        break
+      case '运营':
+        myIcon = 'search'
+        break
+      case '财务':
+        myIcon = 'money'
+        break
+      case '会员':
+        myIcon = 'user'
+        break
+      case '代理':
+        myIcon = 'tree'
+        break
+      case '游戏':
+        myIcon = 'star'
+        break
+    }
     const route: RouteRecordRaw = {
       path: '/' + menu.frontend_url,
       name: menu.name,
@@ -92,7 +114,7 @@ function buildRoutesFromPermissions(list, userPermissions) {
       meta: {
         title: menu.name,
         id: menu.id,
-        icon: 'list'
+        icon: myIcon
       }
     }
 
