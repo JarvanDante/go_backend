@@ -102,7 +102,7 @@
   import { ElMessage } from 'element-plus'
   import { Plus } from '@element-plus/icons-vue'
 
-  import { basicSetting, updateBasicSetting } from '@/api/setting'
+  import { basicSetting, updateBasicSetting } from '@/api/site'
 
   const formRef = ref(null)
 
