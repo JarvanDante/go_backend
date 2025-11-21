@@ -121,7 +121,7 @@
         passwordType: 'password',
         capsTooltip: false,
         loading: false,
-        showDialog: false,
+        showDialog: true,
         redirect: undefined,
         otherQuery: {}
       }
@@ -174,8 +174,13 @@
               store
                 .user()
                 .login(this.loginForm)
-                .then(() => {
-                  this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+                .then(res => {
+                  ElMessage.success('登录成功') // ⭐ 先提示成功
+
+                  setTimeout(() => {
+                    this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+                  }, 500) // ⭐ 延迟 0.5 秒跳转
+
                   this.loading = false
                 })
                 .catch(() => {
