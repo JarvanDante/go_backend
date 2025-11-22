@@ -95,23 +95,37 @@
       </el-timeline>
     </el-drawer>
 
-    <!-- 新增/编辑 弹窗 -->
-    <el-dialog :title="isEdit ? '编辑员工' : '新增员工'" v-model="dialogVisible" width="400px">
-      <el-form :model="form" label-width="80px">
+    <!-- 新增/编辑 员工弹窗（美化版） -->
+    <el-dialog
+      :title="isEdit ? '编辑员工' : '新增员工'"
+      v-model="dialogVisible"
+      width="480px"
+      class="admin-dialog"
+    >
+      <el-form :model="form" label-width="90px" class="admin-form">
         <el-form-item label="账号">
-          <el-input v-model="form.username" :disabled="isEdit" />
+          <el-input
+            v-model="form.username"
+            :disabled="isEdit"
+            placeholder="请输入账号（4-12位字母数字）"
+          />
         </el-form-item>
 
         <el-form-item label="昵称">
-          <el-input v-model="form.nickname" />
+          <el-input v-model="form.nickname" placeholder="请输入昵称" />
         </el-form-item>
 
         <el-form-item label="密码">
-          <el-input v-model="form.password" type="password" placeholder="不修改请留空" />
+          <el-input
+            v-model="form.password"
+            type="password"
+            show-password
+            placeholder="请输入密码（6-18位包含大小写字母和数字）"
+          />
         </el-form-item>
 
         <el-form-item label="职务">
-          <el-select v-model="form.role" placeholder="选择职务">
+          <el-select v-model="form.role" placeholder="请选择职务" style="width: 100%">
             <el-option v-for="r in roles" :key="r.id" :label="r.name" :value="r.id" />
           </el-select>
         </el-form-item>
@@ -122,8 +136,10 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <div class="dialog-footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitForm">确 定</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -269,5 +285,32 @@
     margin-bottom: 10px;
     display: flex;
     align-items: center;
+  }
+
+  /* 整个弹窗整体 padding */
+  .admin-dialog .el-dialog__body {
+    padding: 20px 30px 10px 30px !important;
+  }
+
+  /* 表单行间距 */
+  .admin-form .el-form-item {
+    margin-bottom: 22px;
+  }
+
+  /* 输入框高度更舒服 */
+  .admin-form .el-input__wrapper {
+    height: 40px !important;
+    font-size: 14px;
+  }
+
+  /* 下拉框统一高度 */
+  .admin-form .el-select .el-input__wrapper {
+    height: 40px !important;
+  }
+
+  /* 底部按钮居右 */
+  .dialog-footer {
+    text-align: right;
+    padding: 10px 10px 20px;
   }
 </style>
