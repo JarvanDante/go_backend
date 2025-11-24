@@ -87,12 +87,45 @@
       </div>
     </el-card>
 
-    <el-drawer v-model="logVisible" title="操作日志" size="40%">
-      <el-timeline>
-        <el-timeline-item v-for="item in logs" :key="item.id" :timestamp="item.time">
-          {{ item.content }}
-        </el-timeline-item>
-      </el-timeline>
+    <el-drawer v-model="logVisible" title="操作日志" size="50%">
+      <div class="log-container">
+        <!-- 搜索条件 -->
+        <div class="log-filter">
+          <el-date-picker
+            v-model="logDateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="YYYY-MM-DD"
+            style="width: 280px"
+          />
+          <el-button type="primary" style="margin-left: 10px" @click="loadLogs"> 查询 </el-button>
+        </div>
+
+        <!-- 日志列表 -->
+        <el-table :data="logs" border style="width: 100%; margin-top: 15px" max-height="600">
+          <el-table-column label="序号" type="index" width="60" align="center" />
+          <el-table-column label="操作内容" prop="remark" min-width="150" />
+          <el-table-column label="IP地址" prop="ip" width="140" align="center" />
+          <el-table-column label="操作时间" prop="created_at" width="180" align="center" />
+        </el-table>
+
+        <!-- 分页 -->
+        <div class="log-pagination">
+          <el-pagination
+            v-model:current-page="logQuery.page"
+            v-model:page-size="logQuery.size"
+            :page-sizes="[10, 20, 50]"
+            :total="logTotal"
+            background
+            small
+            layout="total, sizes, prev, pager, next"
+            @size-change="loadLogs"
+            @current-change="loadLogs"
+          />
+        </div>
+      </div>
     </el-drawer>
 
     <!-- 新增/编辑 员工弹窗（美化版） -->
@@ -150,14 +183,53 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { admins, createAdmin, updateAdmin, deleteAdmin } from '@/api/admin'
   import { getRoles } from '@/api/role'
+  import { adminLogs } from '@/api/log'
 
   const logVisible = ref(false)
   const logs = ref([])
+  const logTotal = ref(0)
+  const logDateRange = ref([])
+  const currentUsername = ref('')
 
+  const logQuery = reactive({
+    username: '',
+    start: '',
+    end: '',
+    page: 1,
+    size: 20
+  })
+
+  // 加载日志数据
+  const loadLogs = async () => {
+    const params = {
+      username: logQuery.username,
+      page: logQuery.page,
+      size: logQuery.size
+    }
+
+    // 如果选择了日期范围
+    if (logDateRange.value && logDateRange.value.length === 2) {
+      params.start = logDateRange.value[0]
+      params.end = logDateRange.value[1]
+    }
+
+    const res = await adminLogs(params)
+    if (res.code === 200) {
+      logs.value = res.data.list || []
+      logTotal.value = res.data.count || 0
+    } else {
+      ElMessage.error(res.message || '获取日志失败')
+    }
+  }
+
+  // 打开日志弹窗
   const openLog = async row => {
+    currentUsername.value = row.username
+    logQuery.username = row.username
+    logQuery.page = 1
+    logDateRange.value = []
     logVisible.value = true
-    const res = await getAdminLogs({ id: row.id })
-    logs.value = res.data
+    await loadLogs()
   }
   // 搜索条件
   const query = reactive({
@@ -312,5 +384,22 @@
   .dialog-footer {
     text-align: right;
     padding: 10px 10px 20px;
+  }
+
+  /* 日志容器样式 */
+  .log-container {
+    padding: 0 20px;
+  }
+
+  .log-filter {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .log-pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
   }
 </style>
