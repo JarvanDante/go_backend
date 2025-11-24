@@ -11,51 +11,50 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
 router.beforeEach(async (to, from, next) => {
-  // console.log('router.beforeEach', to.path, from.path);
-  // start progress bar
+  console.log(`🚀 路由跳转: ${from.path} → ${to.path}`)
+
+  // 开始进度条
   NProgress.start()
 
-  // set page title
+  // 设置页面标题
   document.title = getPageTitle(to.meta.title)
 
-  // determine whether the user has logged in
+  // 判断用户是否已登录
   const hasToken = getToken()
 
   if (hasToken) {
     if (to.path === '/login') {
-      // if is logged in, redirect to the home page
-      NProgress.done() // hack: https://github.com/PanJiaChen/vue-element-admin/pull/2939
+      // 已登录，重定向到首页
+      console.log('✅ 已登录，跳转到首页')
+      NProgress.done()
       next({ path: '/' })
     } else {
-      // determine whether the user has obtained his permission roles through getInfo
+      // 判断用户是否已获取权限信息
       const hasRoles = userStore().roles && userStore().roles.length > 0
-      // console.log('hasRoles=', hasRoles);
+
       if (hasRoles) {
+        // 已有权限信息，直接放行
         next()
       } else {
         try {
-          // get user info
-          // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
+          console.log('🔄 获取用户信息和权限...')
+
+          // 获取用户信息
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const infoRes = (await userStore().getInfo()) as any
-          let roles = []
-          if (infoRes.roles) {
-            roles = infoRes.roles
-          }
-          // 用户的角色名数组，如 ["管理员"]
-          const userRoles = roles
+          const userRoles = infoRes.roles || []
 
+          console.log('👤 用户角色:', userRoles)
+
+          // 获取权限列表
           const permissionListRes = (await userStore().permissions()) as any
-          // console.log(permissionListRes.permission_list)
-          let permissionList = []
-          if (permissionListRes.permission_list) {
-            permissionList = permissionListRes.permission_list
-          }
+          const permissionList = permissionListRes.permission_list || []
+          const allRoles = permissionListRes.role_list || []
 
-          // 后端返回全部角色及其权限
-          const allRoles = permissionListRes.role_list
+          console.log('📋 权限菜单树:', permissionList)
+          console.log('🎭 所有角色:', allRoles)
 
-          // 用户拥有的所有权限ID（整合所有角色）
+          // 整合用户拥有的所有权限ID
           let rolePermissionIds: string[] = []
 
           if (userRoles && allRoles) {
@@ -66,35 +65,47 @@ router.beforeEach(async (to, from, next) => {
             })
           }
 
-          // console.log('rolePermissionIds==>', rolePermissionIds)
+          // 去重
+          rolePermissionIds = [...new Set(rolePermissionIds)]
+          console.log('🔑 用户权限ID:', rolePermissionIds)
+
+          // 生成动态路由
           const accessRoutes = await permissionStore().generateRoutes(
             permissionList,
             rolePermissionIds
           )
 
-          accessRoutes.forEach(r => router.addRoute(r))
-          // console.log('next=', accessRoutes);
+          // 动态添加路由
+          accessRoutes.forEach(r => {
+            router.addRoute(r)
+            console.log(`➕ 添加路由: ${r.path}`)
+          })
 
-          // hack method to ensure that addRoutes is complete
-          // set the replace: true, so the navigation will not leave a history record
+          console.log('✅ 动态路由添加完成')
+
+          // 确保 addRoute 完成后再跳转
+          // replace: true 不会留下历史记录
           next({ ...to, replace: true })
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
-          // remove token and go to login page to re-login
+          console.error('❌ 获取权限失败:', error)
+
+          // 清除 token 并跳转到登录页
           await userStore().resetToken()
-          ElMessage.error(error.message || 'Has Error')
+          ElMessage.error(error.message || '获取权限失败，请重新登录')
           NProgress.done()
           next(`/login?redirect=${to.path}`)
         }
       }
     }
   } else {
-    /* has no token*/
+    // 未登录
     if (whiteList.indexOf(to.path) !== -1) {
-      // in the free login whitelist, go directly
+      // 在白名单中，直接放行
       next()
     } else {
-      // other pages that do not have permission to access are redirected to the login page.
+      // 不在白名单中，重定向到登录页
+      console.log('⚠️ 未登录，跳转到登录页')
       NProgress.done()
       next(`/login?redirect=${to.path}`)
     }
