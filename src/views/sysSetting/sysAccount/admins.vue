@@ -3,8 +3,7 @@
     <el-card>
       <!-- 搜索条件 -->
       <div class="filter-box">
-        <el-select v-model="query.status" placeholder="所有状态" style="width: 150px">
-          <el-option label="所有状态" :value="null" />
+        <el-select v-model="query.status" placeholder="所有状态" style="width: 150px" clearable>
           <el-option label="启用" :value="1" />
           <el-option label="禁用" :value="0" />
         </el-select>

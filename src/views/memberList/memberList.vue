@@ -8,8 +8,8 @@
           v-model="query.grade"
           placeholder="所有等级"
           style="width: 150px; margin-left: 10px"
+          clearable
         >
-          <el-option label="所有等级" :value="null" />
           <el-option
             v-for="grade in gradeList"
             :key="grade.id"
@@ -21,8 +21,8 @@
           v-model="query.level"
           placeholder="所有层级"
           style="width: 150px; margin-left: 10px"
+          clearable
         >
-          <el-option label="所有层级" :value="null" />
           <el-option
             v-for="level in levelList"
             :key="level.id"
@@ -34,8 +34,8 @@
           v-model="query.status"
           placeholder="所有状态"
           style="width: 150px; margin-left: 10px"
+          clearable
         >
-          <el-option label="所有状态" :value="null" />
           <el-option label="正常" :value="1" />
           <el-option label="禁用" :value="0" />
         </el-select>

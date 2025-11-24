@@ -46,7 +46,6 @@
   // 加载游戏配置
   const loadGames = async () => {
     const res = await Games()
-    console.log(res)
     if (res.code !== 200) {
       return ElMessage.error(res.message)
     }
