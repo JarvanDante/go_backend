@@ -228,7 +228,7 @@
         </el-table-column>
         <el-table-column label="操作" width="150" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
+            <el-button link @click="viewDetail(row)" class="detail-btn">详情</el-button>
             <el-button link @click="editMember(row)">编辑</el-button>
           </template>
         </el-table-column>
@@ -641,5 +641,11 @@
   .username-link:hover {
     color: #66b1ff;
     text-decoration: underline;
+  }
+  .detail-btn {
+    color: #409eff;
+  }
+  .detail-btn:hover {
+    color: #66b1ff;
   }
 </style>
