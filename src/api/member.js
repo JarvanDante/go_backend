@@ -91,3 +91,47 @@ export function deleteRebateOption(id) {
     data: { id }
   })
 }
+
+// 获取会员层级列表
+export function getUserLevels() {
+  return request({
+    url: '/api/backend/user-levels',
+    method: 'get'
+  })
+}
+
+// 新增会员层级
+export function createUserLevel(data) {
+  return request({
+    url: '/api/backend/create-user-level',
+    method: 'post',
+    data
+  })
+}
+
+// 获取会员层级信息用于编辑
+export function getUpdateUserLevel(id) {
+  return request({
+    url: '/api/backend/update-user-level',
+    method: 'get',
+    params: { id }
+  })
+}
+
+// 编辑会员层级
+export function updateUserLevel(data) {
+  return request({
+    url: '/api/backend/update-user-level',
+    method: 'post',
+    data
+  })
+}
+
+// 删除会员层级
+export function deleteUserLevel(id) {
+  return request({
+    url: '/api/backend/delete-user-level',
+    method: 'post',
+    data: { id }
+  })
+}
